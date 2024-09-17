@@ -3,6 +3,7 @@ from .player import Player
 from .card import Card
 
 from .logic.defend import is_valid_defend
+from .logic.throw import is_valid_throw
 
 
 class Game:
@@ -13,7 +14,7 @@ class Game:
         self.attacker = None
         self.defender = None
         self.cards_on_table = []  # Карты, которые бьются
-        self.pressed_cards = []  # Побитые карты
+        self.pressed_cards = []   # Побитые карты
 
     def add_player(self, id: int) -> Player:
         if len(self.players) == 6:
@@ -54,7 +55,6 @@ class Game:
             raise ValueError("No attacker set.")
 
         if self.defender and defend_card in self.defender.get_hand():
-            # Найти атакующую карту на столе, которую можно побить
             for table_card in self.cards_on_table:
                 if table_card["pressed_card"] or table_card["card"] != attack_card:
                     continue
@@ -107,6 +107,11 @@ class Game:
         print(f"{card_to_attack} / {card_to_defend} is valid: {is_valid}")
         return is_valid
 
+    def is_valid_throw(self, card: Card):
+        is_valid = is_valid_throw(self.get_table_cards(), card)
+        print(f"Throw is valid: {is_valid}")
+        return is_valid
+
     def test(self):
         # Пример игрового процесса
         print("Test game started.")
@@ -122,9 +127,11 @@ class Game:
 
         # Игрок 1 продолжает атаку
         card_to_attack = self.players[0].get_hand()[0]  
+        self.is_valid_throw(card_to_attack)
         self.attack_with_card(card_to_attack)
 
-        # Игрок 2 забиращает карты на столе
+        # Игрок 2 забиращает карты со стола
         self.take_table()
 
+        # заканчиваем ход первого игрока
         self.end_turn()
